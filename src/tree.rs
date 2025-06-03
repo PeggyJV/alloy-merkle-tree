@@ -45,8 +45,8 @@ pub struct MerkleTree {
     leaves: Vec<B256>,
     /// Indicates whether the leaves should be sorted before tree construction.
     is_sort: bool,
-    /// Indicates whether the nodes of each layer should be sorted before being hashed.
-    is_sort_nodes: bool,
+    /// Indicates whether a pair of nodes should be ordered before being hashed.
+    is_sort_pairs: bool,
     /// Indicates whether the tree has been constructed.
     is_tree_ready: bool,
     /// Layers of the tree, where each layer is a vector of hashes.
@@ -70,7 +70,7 @@ impl MerkleTree {
         MerkleTree {
             leaves: Vec::new(),
             is_sort: false,
-            is_sort_nodes: false,
+            is_sort_pairs: false,
             is_tree_ready: false,
             layers: Vec::new(),
             depth: 0,
@@ -83,9 +83,9 @@ impl MerkleTree {
         self.is_sort = sort;
     }
 
-    /// Sets whether the nodes of each layer should be sorted before being hashed.
-    pub fn set_sort_nodes(&mut self, sort: bool) {
-        self.is_sort_nodes = sort;
+    /// Sets whether a pair of nodes should be ordered before being hashed.
+    pub fn set_sort_pairs(&mut self, sort: bool) {
+        self.is_sort_pairs = sort;
     }
 
     /// Checks if the leaves are set to be sorted.
@@ -138,11 +138,15 @@ impl MerkleTree {
                     left
                 };
                 i += 1;
-                new_layer.push(Self::hash(left, right));
-            }
 
-            if self.is_sort_nodes {
-                new_layer.sort();
+                // Sort pairs if enabled
+                let (left, right) = if self.is_sort_pairs && right < left{
+                    (right, left)
+                } else {
+                    (left, right)
+                };
+
+                new_layer.push(Self::hash(left, right));
             }
 
             self.layers.push(new_layer);
