@@ -78,6 +78,11 @@ impl MerkleTree {
         }
     }
 
+    /// Returns a reference to the leaves of the tree.
+    pub fn leaves(&self) -> &Vec<B256> {
+        &self.leaves
+    }
+
     /// Sets whether the leaves should be sorted before tree construction.
     pub fn set_sort(&mut self, sort: bool) {
         self.is_sort = sort;
